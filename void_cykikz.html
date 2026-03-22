@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VOID — Cykikz</title>
+<title>VOID — Harshit Bhatt</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -328,7 +328,7 @@ footer {
 <div id="cursor"></div>
 
 <nav>
-  <a href="#" class="nav-logo">VOID</a>
+  <a href="#hero" class="nav-logo">VOID</a>
   <div class="nav-center">
     <a href="#about">About</a>
     <a href="#interests">Interests</a>
@@ -343,7 +343,7 @@ footer {
   <div id="canvas-wrap"></div>
   <div id="drop-overlay">
     <div class="hero-brand">VOID<br><span>.</span></div>
-    <div class="hero-sub">3D Viewer · Light Experiments · Personal Tool</div>
+    <div class="hero-sub">3D Viewer · Light Testing · Three.js Preview Tool</div>
     <div class="drop-zone-ring" onclick="document.getElementById('file-input').click()">
       <div class="drop-icon">⬡</div>
       <div class="drop-label">Drop .GLB<br>or .GLTF</div>
@@ -352,7 +352,7 @@ footer {
   </div>
   <div class="hero-bottom">
     <div class="hero-hl">
-      DROP A<br>MODEL <em>&</em><br>PLAY
+      DROP A<br>MODEL. <em>SEE</em><br>HOW IT LOOKS.
     </div>
     <div class="hero-meta">
       <p>Made by</p>
@@ -368,20 +368,20 @@ footer {
 <div class="marquee-wrap">
   <div class="marquee-track">
     <span class="marquee-item">3D Viewer</span><span class="marquee-dot">✦</span>
-    <span class="marquee-item">Light Experiments</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Light Testing</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">PBR Materials</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">GLB & GLTF</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">Real-Time Rendering</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Three.js Preview</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">Orbit Controls</span><span class="marquee-dot">✦</span>
-    <span class="marquee-item">Three.js</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">ACES Tone Mapping</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">3D Viewer</span><span class="marquee-dot">✦</span>
-    <span class="marquee-item">Light Experiments</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Light Testing</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">PBR Materials</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">GLB & GLTF</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">Real-Time Rendering</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Three.js Preview</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">Orbit Controls</span><span class="marquee-dot">✦</span>
-    <span class="marquee-item">Three.js</span><span class="marquee-dot">✦</span>
     <span class="marquee-item">ACES Tone Mapping</span><span class="marquee-dot">✦</span>
   </div>
 </div>
@@ -391,22 +391,21 @@ footer {
 <div class="section-wrap">
   <div class="section-label">About</div>
   <div class="big-heading reveal">
-    JUST A<br>
-    <span class="dim">PERSON WHO</span><br>
-    <span class="hi">LIKES 3D</span>
+    WHAT<br>
+    <span class="dim">THIS</span><br>
+    <span class="hi">ACTUALLY IS</span>
   </div>
   <div class="about-grid">
     <div>
       <div class="about-body">
-        Hey, I'm <strong>Cykikz</strong>. This is my personal 3D viewer — a tool I built to drop models in and mess around with lighting without spinning up Blender every time.<br><br>
-        I'm into <strong>3D art, real-time rendering, and seeing how light behaves</strong> on different materials. No studio, no agency — just someone who finds this stuff genuinely interesting and wanted a clean place to experiment.<br><br>
-        Drop any <strong>.GLB or .GLTF</strong> file onto the viewport above, tweak the lights, and see what it looks like. That's the whole point.
+        A personal tool for testing how a 3D model will look when imported into a Three.js website. Drop a GLB in, <strong>check the lighting, materials and scale</strong> — before wiring it into an actual project.<br><br>
+        Built because opening Blender or spinning up a dev server every time is overkill. This is just a <strong>quick sanity check in the browser</strong>. Dark model? Crank the ambient. Wrong scale? It auto-fits. Looks good? You're done.
       </div>
       <div class="stat-grid">
         <div class="stat-cell"><div class="stat-num">GLB</div><div class="stat-lbl">Primary Format</div></div>
         <div class="stat-cell"><div class="stat-num">PBR</div><div class="stat-lbl">Shading Model</div></div>
         <div class="stat-cell"><div class="stat-num">3</div><div class="stat-lbl">Light Presets</div></div>
-        <div class="stat-cell"><div class="stat-num">∞</div><div class="stat-lbl">Files You Can Drop</div></div>
+        <div class="stat-cell"><div class="stat-num">0</div><div class="stat-lbl">Files Uploaded</div></div>
       </div>
     </div>
     <div>
@@ -415,24 +414,24 @@ footer {
         <div style="display:flex;flex-direction:column;gap:0;">
           <div style="display:flex;gap:1.2rem;align-items:baseline;padding:0.9rem 0;border-bottom:1px solid var(--border);">
             <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);min-width:28px;">1</span>
-            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Drag & drop any .GLB or .GLTF onto the viewport</span>
+            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Drag & drop any .GLB or .GLTF onto the viewport above</span>
           </div>
           <div style="display:flex;gap:1.2rem;align-items:baseline;padding:0.9rem 0;border-bottom:1px solid var(--border);">
             <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);min-width:28px;">2</span>
-            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Orbit with drag, zoom with scroll, pan with right-drag</span>
+            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Orbit with drag · zoom with scroll · pan with right-drag</span>
           </div>
           <div style="display:flex;gap:1.2rem;align-items:baseline;padding:0.9rem 0;border-bottom:1px solid var(--border);">
             <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);min-width:28px;">3</span>
-            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Pick a light preset or fine-tune with the panel (bottom right)</span>
+            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Pick a light preset or dial it in manually (bottom right panel)</span>
           </div>
           <div style="display:flex;gap:1.2rem;align-items:baseline;padding:0.9rem 0;">
             <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);min-width:28px;">4</span>
-            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Dark models? Crank ambient & exposure — they'll show up</span>
+            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">If it looks right here, it'll look right in your Three.js project</span>
           </div>
         </div>
       </div>
       <div style="margin-top:1.5rem;padding:1.5rem;border:1px solid var(--border);font-size:0.72rem;line-height:2;color:var(--text-dim);">
-        Built with <strong style="color:var(--fg);font-weight:400;">Three.js r128</strong>, GLTFLoader, OrbitControls, PMREMGenerator env maps, ACES filmic tone mapping, and shadow maps. No backend. Fully local — your files never leave the browser.
+        Built with <strong style="color:var(--fg);font-weight:400;">Three.js r128</strong> · GLTFLoader · OrbitControls · PMREMGenerator · ACES filmic tone mapping · PCF shadow maps. No backend. Files never leave your browser.
       </div>
     </div>
   </div>
@@ -448,72 +447,74 @@ footer {
     <div class="interest-row">
       <div class="int-left">
         <span class="int-num">01</span>
-        <span class="int-name">3D Modelling</span>
+        <span class="int-name">Generative AI & LLMs</span>
       </div>
       <div class="int-tags">
-        <span class="int-tag">Sculpting</span>
-        <span class="int-tag">Hard Surface</span>
-        <span class="int-tag">Blender</span>
+        <span class="int-tag">LangChain</span>
+        <span class="int-tag">RAG</span>
+        <span class="int-tag">Ollama</span>
+        <span class="int-tag">Agents</span>
       </div>
       <span class="int-arrow">→</span>
     </div>
     <div class="interest-row">
       <div class="int-left">
         <span class="int-num">02</span>
-        <span class="int-name">Lighting & Mood</span>
+        <span class="int-name">3D Modelling</span>
       </div>
       <div class="int-tags">
-        <span class="int-tag">PBR</span>
-        <span class="int-tag">HDRI</span>
-        <span class="int-tag">Tone Mapping</span>
+        <span class="int-tag">Blender</span>
+        <span class="int-tag">Sculpting</span>
+        <span class="int-tag">PBR Materials</span>
+        <span class="int-tag">GLB</span>
       </div>
       <span class="int-arrow">→</span>
     </div>
     <div class="interest-row">
       <div class="int-left">
         <span class="int-num">03</span>
-        <span class="int-name">Real-Time Rendering</span>
+        <span class="int-name">Game Development</span>
       </div>
       <div class="int-tags">
-        <span class="int-tag">WebGL</span>
-        <span class="int-tag">Three.js</span>
-        <span class="int-tag">Shaders</span>
+        <span class="int-tag">Pygame</span>
+        <span class="int-tag">Mechanics Design</span>
+        <span class="int-tag">Procedural Gen</span>
       </div>
       <span class="int-arrow">→</span>
     </div>
     <div class="interest-row">
       <div class="int-left">
         <span class="int-num">04</span>
-        <span class="int-name">Material Studies</span>
+        <span class="int-name">Room & Space Design</span>
       </div>
       <div class="int-tags">
-        <span class="int-tag">Roughness</span>
-        <span class="int-tag">Metalness</span>
-        <span class="int-tag">Subsurface</span>
+        <span class="int-tag">Layouts</span>
+        <span class="int-tag">Lighting</span>
+        <span class="int-tag">Visualisation</span>
       </div>
       <span class="int-arrow">→</span>
     </div>
     <div class="interest-row">
       <div class="int-left">
         <span class="int-num">05</span>
-        <span class="int-name">Motion & Animation</span>
+        <span class="int-name">Open Source Tools</span>
       </div>
       <div class="int-tags">
-        <span class="int-tag">Loops</span>
-        <span class="int-tag">Keyframes</span>
-        <span class="int-tag">Procedural</span>
+        <span class="int-tag">GitHub</span>
+        <span class="int-tag">No-build Web</span>
+        <span class="int-tag">Browser APIs</span>
       </div>
       <span class="int-arrow">→</span>
     </div>
     <div class="interest-row">
       <div class="int-left">
         <span class="int-num">06</span>
-        <span class="int-name">Open Source Tools</span>
+        <span class="int-name">AI Agent Frameworks</span>
       </div>
       <div class="int-tags">
-        <span class="int-tag">GitHub</span>
-        <span class="int-tag">Browser APIs</span>
-        <span class="int-tag">No Build Tools</span>
+        <span class="int-tag">Autonomous Agents</span>
+        <span class="int-tag">Pipelines</span>
+        <span class="int-tag">Tool Use</span>
       </div>
       <span class="int-arrow">→</span>
     </div>
@@ -558,7 +559,7 @@ footer {
   <div class="contact-grid">
     <div>
       <div class="contact-intro">
-        Not a studio, not taking commissions — just someone who likes 3D stuff. If you want to talk about models, lighting, tools, or anything else, find me on GitHub or send a message.
+        Not taking commissions, just building things. If something here is useful to you, or you want to talk 3D, Three.js, or anything else — find me on GitHub.
       </div>
       <div class="contact-detail">
         <div class="cd-row">
@@ -566,21 +567,25 @@ footer {
           <a href="https://github.com/Cykikz" target="_blank" class="cd-val">github.com/Cykikz</a>
         </div>
         <div class="cd-row">
+          <span class="cd-key">LinkedIn</span>
+          <a href="https://www.linkedin.com/in/cykikzz" target="_blank" class="cd-val">linkedin.com/in/cykikzz</a>
+        </div>
+        <div class="cd-row">
+          <span class="cd-key">Email</span>
+          <a href="mailto:karanbhatt1856@gmail.com" class="cd-val">karanbhatt1856@gmail.com</a>
+        </div>
+        <div class="cd-row">
+          <span class="cd-key">Open To</span>
+          <span class="cd-val" style="color:var(--text-mid);">Collabs · Open Source · Tech Talks</span>
+        </div>
+        <div class="cd-row">
           <span class="cd-key">This Tool</span>
           <span class="cd-val" style="color:var(--text-mid);">Runs fully in browser</span>
-        </div>
-        <div class="cd-row">
-          <span class="cd-key">Files</span>
-          <span class="cd-val" style="color:var(--text-mid);">Never leave your machine</span>
-        </div>
-        <div class="cd-row">
-          <span class="cd-key">Built With</span>
-          <span class="cd-val" style="color:var(--text-mid);">Three.js · HTML · CSS</span>
         </div>
       </div>
     </div>
     <div>
-      <div id="form-success">✦ Message sent — I'll get back to you.</div>
+      <div id="form-success">✦ Sent — I'll get back to you.</div>
       <form class="contact-form" id="contact-form" onsubmit="handleSubmit(event)">
         <div class="form-group">
           <label>Name</label>
@@ -591,8 +596,8 @@ footer {
           <input type="email" placeholder="your@email.com" required>
         </div>
         <div class="form-group">
-          <label>Message</label>
-          <textarea rows="6" placeholder="What's up?" required></textarea>
+          <label>What's up?</label>
+          <textarea rows="6" placeholder="AI collab, 3D stuff, game idea, or just saying hi..." required></textarea>
         </div>
         <button type="submit" class="submit-btn">SEND IT →</button>
       </form>
@@ -613,8 +618,9 @@ footer {
       <a href="#viewer">Viewer</a>
       <a href="#contact">Contact</a>
       <a href="https://github.com/Cykikz" target="_blank">GitHub ↗</a>
+      <a href="https://www.linkedin.com/in/cykikzz" target="_blank">LinkedIn ↗</a>
     </div>
-    <div class="footer-copy">Built by Cykikz. No rights reserved — do whatever.</div>
+    <div class="footer-copy">Built by Harshit Bhatt. No rights reserved — do whatever.</div>
   </div>
 </footer>
 
@@ -644,6 +650,20 @@ document.addEventListener('mousemove', e => {
 document.querySelectorAll('a, button, .work-card, .interest-row, .drop-zone-ring, input, textarea').forEach(el => {
   el.addEventListener('mouseenter', () => cursor.classList.add('big'));
   el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+// ACTIVE NAV ON SCROLL
+const sections = ['hero','about','interests','viewer','contact'];
+const navLinks = document.querySelectorAll('.nav-center a');
+window.addEventListener('scroll', () => {
+  let current = 'hero';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 120) current = id;
+  });
+  navLinks.forEach(a => {
+    a.style.color = a.getAttribute('href') === '#' + current ? 'var(--fg)' : '';
+  });
 });
 
 const observer = new IntersectionObserver(entries => {
