@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOID — Cykikz</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #080808;
+  --fg: #ede9df;
+  --accent: #d4ff00;
+  --accent2: #ff3cac;
+  --muted: #3a3a3a;
+  --border: #1c1c1c;
+  --text-dim: #666;
+  --text-mid: #999;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'DM Mono', monospace;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+#cursor {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s, width 0.2s, height 0.2s, opacity 0.2s;
+}
+#cursor.big { width: 40px; height: 40px; background: transparent; border: 1px solid var(--accent); }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.2rem 3rem;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  background: rgba(8,8,8,0.75);
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem; letter-spacing: 0.12em;
+  color: var(--accent); text-decoration: none;
+}
+.nav-center {
+  display: flex; gap: 2.5rem;
+  font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+}
+.nav-center a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+.nav-center a:hover { color: var(--fg); }
+.nav-cta {
+  font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+  border: 1px solid var(--border); padding: 0.5rem 1.2rem;
+  color: var(--fg); text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+.nav-cta:hover { border-color: var(--accent); color: var(--accent); }
+
+#hero {
+  position: relative; width: 100%; height: 100vh;
+  overflow: hidden; display: flex; align-items: flex-end;
+}
+#canvas-wrap { position: absolute; inset: 0; }
+#canvas-wrap canvas { width: 100% !important; height: 100% !important; display: block; }
+
+#drop-overlay {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg); transition: opacity 0.8s ease;
+}
+#drop-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.hero-brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(5rem, 14vw, 13rem);
+  letter-spacing: -0.01em; line-height: 0.88;
+  color: var(--fg); text-align: center;
+}
+.hero-brand span { color: var(--accent); }
+.hero-sub {
+  margin-top: 1.5rem;
+  font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-dim);
+  text-align: center;
+}
+.drop-zone-ring {
+  margin-top: 3rem;
+  width: 120px; height: 120px; border-radius: 50%;
+  border: 1px dashed #333;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 6px; cursor: pointer;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.drop-zone-ring:hover { border-color: var(--accent); transform: scale(1.05); }
+.drop-label { font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: #444; text-align: center; line-height: 1.6; }
+.drop-icon { font-size: 1.4rem; opacity: 0.4; }
+#file-input { display: none; }
+
+.hero-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 5;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding: 2.5rem 3rem; pointer-events: none;
+}
+.hero-hl {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  line-height: 0.9; letter-spacing: 0.02em; color: var(--fg);
+}
+.hero-hl em { color: var(--accent); font-style: normal; }
+.hero-meta { text-align: right; }
+.hero-meta p { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.3rem; }
+.hero-meta .stat { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--fg); line-height: 1; }
+
+.scroll-line {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 1px; height: 60px; z-index: 5;
+  background: linear-gradient(to bottom, transparent, var(--accent));
+  animation: grow-line 2s ease-in-out infinite alternate;
+}
+@keyframes grow-line { from { height: 30px; opacity: 0.3; } to { height: 70px; opacity: 1; } }
+
+.marquee-wrap {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden; padding: 0.9rem 0;
+  background: var(--accent);
+}
+.marquee-track {
+  display: flex; gap: 0; white-space: nowrap;
+  animation: marquee 18s linear infinite;
+}
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-item {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.95rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--bg); padding: 0 2.5rem;
+}
+.marquee-dot { color: var(--bg); opacity: 0.3; padding: 0 0.5rem; }
+
+.section-wrap {
+  max-width: 1280px; margin: 0 auto;
+  padding: 7rem 3rem; border-bottom: 1px solid var(--border);
+}
+.section-label {
+  font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 2.5rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.section-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--text-dim); }
+.big-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.8rem, 6vw, 6rem);
+  line-height: 0.92; letter-spacing: 0.02em; color: var(--fg);
+}
+.big-heading .dim { color: var(--text-dim); }
+.big-heading .hi { color: var(--accent); }
+
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; margin-top: 4rem; align-items: start;
+}
+.about-body { font-size: 0.82rem; line-height: 2.1; color: var(--text-mid); }
+.about-body strong { color: var(--fg); font-weight: 400; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border: 1px solid var(--border); margin-top: 3rem; }
+.stat-cell { padding: 1.8rem 1.5rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.stat-cell:nth-child(even) { border-right: none; }
+.stat-cell:nth-child(3), .stat-cell:nth-child(4) { border-bottom: none; }
+.stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: var(--accent); line-height: 1; }
+.stat-lbl { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin-top: 0.4rem; }
+
+/* INTERESTS — replaces services */
+.interests-list { margin-top: 4rem; }
+.interest-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2rem 0; border-bottom: 1px solid var(--border);
+  transition: padding 0.3s; cursor: default;
+}
+.interest-row:hover { padding-left: 1rem; }
+.interest-row:hover .int-num { color: var(--accent); }
+.int-left { display: flex; align-items: baseline; gap: 1.5rem; }
+.int-num { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; min-width: 24px; transition: color 0.3s; }
+.int-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 3.5rem);
+  letter-spacing: 0.04em; color: var(--fg); transition: color 0.3s;
+}
+.interest-row:hover .int-name { color: var(--accent); }
+.int-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.int-tag {
+  font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1px solid var(--border); padding: 0.25rem 0.7rem;
+  color: var(--text-dim); border-radius: 999px;
+}
+.int-arrow { font-size: 1.2rem; color: var(--text-dim); transition: transform 0.3s, color 0.3s; }
+.interest-row:hover .int-arrow { transform: translateX(6px) rotate(-45deg); color: var(--accent); }
+
+.work-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  margin-top: 4rem; border: 1px solid var(--border);
+}
+.work-card {
+  padding: 2.5rem 2rem; background: var(--bg);
+  border-right: 1px solid var(--border);
+  transition: background 0.3s; cursor: pointer; position: relative; overflow: hidden;
+}
+.work-card:last-child { border-right: none; }
+.work-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--accent); transform: scaleY(0); transform-origin: bottom;
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); z-index: 0;
+}
+.work-card:hover::before { transform: scaleY(1); }
+.work-card > * { position: relative; z-index: 1; }
+.wc-num { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: var(--accent); line-height: 1; transition: color 0.3s; }
+.work-card:hover .wc-num { color: var(--bg); }
+.wc-title { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg); margin: 0.6rem 0 0.8rem; transition: color 0.3s; }
+.work-card:hover .wc-title { color: var(--bg); }
+.wc-body { font-size: 0.7rem; line-height: 1.9; color: var(--text-dim); transition: color 0.3s; }
+.work-card:hover .wc-body { color: var(--bg); }
+
+#light-toggle {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 300;
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--fg); font-family: 'DM Mono', monospace;
+  font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 0.6rem 1rem; cursor: pointer;
+  display: none; gap: 0.6rem; align-items: center;
+  transition: border-color 0.2s;
+}
+#light-toggle.show { display: flex; }
+#light-toggle:hover { border-color: var(--accent); color: var(--accent); }
+#light-toggle .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse-dot 1.5s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+#light-panel {
+  position: fixed; bottom: 5rem; right: 2rem; z-index: 299;
+  background: rgba(8,8,8,0.95); border: 1px solid var(--border);
+  padding: 1.2rem; width: 190px; backdrop-filter: blur(12px);
+  display: none; flex-direction: column; gap: 1rem;
+}
+#light-panel.open { display: flex; }
+.lp-head { font-size: 0.58rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-dim); }
+.lp-row { display: flex; flex-direction: column; gap: 0.35rem; }
+.lp-row label { font-size: 0.58rem; color: #555; letter-spacing: 0.08em; }
+.lp-row input[type=range] { width: 100%; accent-color: var(--accent); height: 2px; }
+.lp-row input[type=color] { width: 100%; height: 24px; border: 1px solid var(--border); background: none; cursor: pointer; }
+
+/* CONTACT */
+.contact-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; margin-top: 4rem; align-items: start;
+}
+.contact-intro { font-size: 0.82rem; line-height: 2.1; color: var(--text-mid); margin-bottom: 2.5rem; }
+.contact-detail { border: 1px solid var(--border); }
+.cd-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 1.2rem; border-bottom: 1px solid var(--border);
+}
+.cd-row:last-child { border-bottom: none; }
+.cd-key { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+.cd-val { font-size: 0.72rem; color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
+.cd-val:hover { opacity: 0.7; }
+
+/* MESSAGE FORM */
+.contact-form { display: flex; flex-direction: column; gap: 1.2rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-group label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+.form-group input,
+.form-group textarea {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--fg); font-family: 'DM Mono', monospace; font-size: 0.78rem;
+  padding: 0.8rem 1rem; outline: none; transition: border-color 0.2s; resize: none;
+}
+.form-group input:focus, .form-group textarea:focus { border-color: var(--accent); }
+.submit-btn {
+  margin-top: 0.5rem;
+  background: var(--accent); border: none; color: var(--bg);
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.15em;
+  padding: 1rem 2rem; cursor: pointer; width: 100%;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.submit-btn:hover { opacity: 0.85; }
+.submit-btn:active { transform: scale(0.99); }
+#form-success {
+  display: none; padding: 1.2rem; border: 1px solid var(--accent);
+  font-size: 0.72rem; color: var(--accent); letter-spacing: 0.1em; line-height: 1.8;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  max-width: 1280px; margin: 0 auto;
+  padding: 3rem; display: flex; justify-content: space-between; align-items: flex-end;
+  flex-wrap: wrap; gap: 2rem;
+}
+.footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; letter-spacing: 0.05em; color: var(--fg); line-height: 1; }
+.footer-logo span { color: var(--accent); }
+.footer-right { text-align: right; }
+.footer-links { display: flex; gap: 2rem; margin-bottom: 1rem; justify-content: flex-end; }
+.footer-links a { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--fg); }
+.footer-copy { font-size: 0.58rem; letter-spacing: 0.1em; color: #333; }
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.reveal { opacity: 0; animation: fade-up 0.7s ease forwards; animation-play-state: paused; }
+.reveal.in { animation-play-state: running; }
+
+@media (max-width: 768px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-center { display: none; }
+  .section-wrap { padding: 4rem 1.5rem; }
+  .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .work-grid { grid-template-columns: 1fr; }
+  .work-card { border-right: none; border-bottom: 1px solid var(--border); }
+  footer { flex-direction: column; align-items: flex-start; }
+  .footer-right { text-align: left; }
+  .footer-links { justify-content: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<nav>
+  <a href="#" class="nav-logo">VOID</a>
+  <div class="nav-center">
+    <a href="#about">About</a>
+    <a href="#interests">Interests</a>
+    <a href="#viewer">Viewer</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <a href="#contact" class="nav-cta">Contact</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div id="canvas-wrap"></div>
+  <div id="drop-overlay">
+    <div class="hero-brand">VOID<br><span>.</span></div>
+    <div class="hero-sub">3D Viewer · Light Experiments · Personal Tool</div>
+    <div class="drop-zone-ring" onclick="document.getElementById('file-input').click()">
+      <div class="drop-icon">⬡</div>
+      <div class="drop-label">Drop .GLB<br>or .GLTF</div>
+    </div>
+    <input type="file" id="file-input" accept=".glb,.gltf">
+  </div>
+  <div class="hero-bottom">
+    <div class="hero-hl">
+      DROP A<br>MODEL <em>&</em><br>PLAY
+    </div>
+    <div class="hero-meta">
+      <p>Made by</p>
+      <div class="stat">CYKIKZ</div>
+      <p style="margin-top:1rem;">Format</p>
+      <div class="stat" style="font-size:1.6rem;">GLB / GLTF</div>
+    </div>
+  </div>
+  <div class="scroll-line"></div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">3D Viewer</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Light Experiments</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">PBR Materials</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">GLB & GLTF</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Real-Time Rendering</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Orbit Controls</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Three.js</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">ACES Tone Mapping</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">3D Viewer</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Light Experiments</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">PBR Materials</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">GLB & GLTF</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Real-Time Rendering</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Orbit Controls</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">Three.js</span><span class="marquee-dot">✦</span>
+    <span class="marquee-item">ACES Tone Mapping</span><span class="marquee-dot">✦</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="about">
+<div class="section-wrap">
+  <div class="section-label">About</div>
+  <div class="big-heading reveal">
+    JUST A<br>
+    <span class="dim">PERSON WHO</span><br>
+    <span class="hi">LIKES 3D</span>
+  </div>
+  <div class="about-grid">
+    <div>
+      <div class="about-body">
+        Hey, I'm <strong>Cykikz</strong>. This is my personal 3D viewer — a tool I built to drop models in and mess around with lighting without spinning up Blender every time.<br><br>
+        I'm into <strong>3D art, real-time rendering, and seeing how light behaves</strong> on different materials. No studio, no agency — just someone who finds this stuff genuinely interesting and wanted a clean place to experiment.<br><br>
+        Drop any <strong>.GLB or .GLTF</strong> file onto the viewport above, tweak the lights, and see what it looks like. That's the whole point.
+      </div>
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="stat-num">GLB</div><div class="stat-lbl">Primary Format</div></div>
+        <div class="stat-cell"><div class="stat-num">PBR</div><div class="stat-lbl">Shading Model</div></div>
+        <div class="stat-cell"><div class="stat-num">3</div><div class="stat-lbl">Light Presets</div></div>
+        <div class="stat-cell"><div class="stat-num">∞</div><div class="stat-lbl">Files You Can Drop</div></div>
+      </div>
+    </div>
+    <div>
+      <div style="border:1px solid var(--border); padding:2rem;">
+        <div style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem;">How It Works</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;gap:1.2rem;align-items:baseline;padding:0.9rem 0;border-bottom:1px solid var(--border);">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);min-width:28px;">1</span>
+            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Drag & drop any .GLB or .GLTF onto the viewport</span>
+          </div>
+          <div style="display:flex;gap:1.2rem;align-items:baseline;padding:0.9rem 0;border-bottom:1px solid var(--border);">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);min-width:28px;">2</span>
+            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Orbit with drag, zoom with scroll, pan with right-drag</span>
+          </div>
+          <div style="display:flex;gap:1.2rem;align-items:baseline;padding:0.9rem 0;border-bottom:1px solid var(--border);">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);min-width:28px;">3</span>
+            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Pick a light preset or fine-tune with the panel (bottom right)</span>
+          </div>
+          <div style="display:flex;gap:1.2rem;align-items:baseline;padding:0.9rem 0;">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);min-width:28px;">4</span>
+            <span style="font-size:0.72rem;color:var(--text-mid);line-height:1.7;">Dark models? Crank ambient & exposure — they'll show up</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1.5rem;padding:1.5rem;border:1px solid var(--border);font-size:0.72rem;line-height:2;color:var(--text-dim);">
+        Built with <strong style="color:var(--fg);font-weight:400;">Three.js r128</strong>, GLTFLoader, OrbitControls, PMREMGenerator env maps, ACES filmic tone mapping, and shadow maps. No backend. Fully local — your files never leave the browser.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- INTERESTS -->
+<div id="interests">
+<div class="section-wrap">
+  <div class="section-label">Interests</div>
+  <div class="big-heading reveal">THINGS<br><span class="dim">I'M INTO</span></div>
+  <div class="interests-list">
+    <div class="interest-row">
+      <div class="int-left">
+        <span class="int-num">01</span>
+        <span class="int-name">3D Modelling</span>
+      </div>
+      <div class="int-tags">
+        <span class="int-tag">Sculpting</span>
+        <span class="int-tag">Hard Surface</span>
+        <span class="int-tag">Blender</span>
+      </div>
+      <span class="int-arrow">→</span>
+    </div>
+    <div class="interest-row">
+      <div class="int-left">
+        <span class="int-num">02</span>
+        <span class="int-name">Lighting & Mood</span>
+      </div>
+      <div class="int-tags">
+        <span class="int-tag">PBR</span>
+        <span class="int-tag">HDRI</span>
+        <span class="int-tag">Tone Mapping</span>
+      </div>
+      <span class="int-arrow">→</span>
+    </div>
+    <div class="interest-row">
+      <div class="int-left">
+        <span class="int-num">03</span>
+        <span class="int-name">Real-Time Rendering</span>
+      </div>
+      <div class="int-tags">
+        <span class="int-tag">WebGL</span>
+        <span class="int-tag">Three.js</span>
+        <span class="int-tag">Shaders</span>
+      </div>
+      <span class="int-arrow">→</span>
+    </div>
+    <div class="interest-row">
+      <div class="int-left">
+        <span class="int-num">04</span>
+        <span class="int-name">Material Studies</span>
+      </div>
+      <div class="int-tags">
+        <span class="int-tag">Roughness</span>
+        <span class="int-tag">Metalness</span>
+        <span class="int-tag">Subsurface</span>
+      </div>
+      <span class="int-arrow">→</span>
+    </div>
+    <div class="interest-row">
+      <div class="int-left">
+        <span class="int-num">05</span>
+        <span class="int-name">Motion & Animation</span>
+      </div>
+      <div class="int-tags">
+        <span class="int-tag">Loops</span>
+        <span class="int-tag">Keyframes</span>
+        <span class="int-tag">Procedural</span>
+      </div>
+      <span class="int-arrow">→</span>
+    </div>
+    <div class="interest-row">
+      <div class="int-left">
+        <span class="int-num">06</span>
+        <span class="int-name">Open Source Tools</span>
+      </div>
+      <div class="int-tags">
+        <span class="int-tag">GitHub</span>
+        <span class="int-tag">Browser APIs</span>
+        <span class="int-tag">No Build Tools</span>
+      </div>
+      <span class="int-arrow">→</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 3D VIEWER -->
+<div id="viewer" style="border-bottom:1px solid var(--border);">
+<div class="section-wrap" style="border-bottom:none;">
+  <div class="section-label">3D Viewer</div>
+  <div class="big-heading reveal">DROP YOUR<br><span class="hi">MODEL IN</span></div>
+  <div style="margin-top:0.8rem;font-size:0.72rem;color:var(--text-dim);line-height:2;">Supports GLB & GLTF. Drag directly onto the hero viewport above, or click the ring to browse files.<br>The lighting panel appears bottom-right once a model is loaded.</div>
+</div>
+<div class="section-wrap" style="border:none;padding-top:0;">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:2rem;">LIGHT PRESETS — CLICK TO APPLY</div>
+  <div class="work-grid">
+    <div class="work-card" onclick="applyPreset('studio')">
+      <div class="wc-num">01</div>
+      <div class="wc-title">Studio White</div>
+      <div class="wc-body">Clean neutral white key, soft blue fill. Classic product look. Good starting point for any model.</div>
+    </div>
+    <div class="work-card" onclick="applyPreset('neon')">
+      <div class="wc-num">02</div>
+      <div class="wc-title">Neon Night</div>
+      <div class="wc-body">Hot magenta key, acid-green fill. Deep shadow pools. Makes dark models pop hard.</div>
+    </div>
+    <div class="work-card" onclick="applyPreset('golden')">
+      <div class="wc-num">03</div>
+      <div class="wc-title">Golden Hour</div>
+      <div class="wc-body">Warm amber key, cool blue backlight. Cinematic. Works great on organic shapes.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- CONTACT -->
+<div id="contact">
+<div class="section-wrap">
+  <div class="section-label">Contact</div>
+  <div class="big-heading reveal">SAY<br><span class="dim">HI OR</span><br><span class="hi">WHATEVER</span></div>
+  <div class="contact-grid">
+    <div>
+      <div class="contact-intro">
+        Not a studio, not taking commissions — just someone who likes 3D stuff. If you want to talk about models, lighting, tools, or anything else, find me on GitHub or send a message.
+      </div>
+      <div class="contact-detail">
+        <div class="cd-row">
+          <span class="cd-key">GitHub</span>
+          <a href="https://github.com/Cykikz" target="_blank" class="cd-val">github.com/Cykikz</a>
+        </div>
+        <div class="cd-row">
+          <span class="cd-key">This Tool</span>
+          <span class="cd-val" style="color:var(--text-mid);">Runs fully in browser</span>
+        </div>
+        <div class="cd-row">
+          <span class="cd-key">Files</span>
+          <span class="cd-val" style="color:var(--text-mid);">Never leave your machine</span>
+        </div>
+        <div class="cd-row">
+          <span class="cd-key">Built With</span>
+          <span class="cd-val" style="color:var(--text-mid);">Three.js · HTML · CSS</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div id="form-success">✦ Message sent — I'll get back to you.</div>
+      <form class="contact-form" id="contact-form" onsubmit="handleSubmit(event)">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea rows="6" placeholder="What's up?" required></textarea>
+        </div>
+        <button type="submit" class="submit-btn">SEND IT →</button>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+
+<footer>
+  <div>
+    <div class="footer-logo">VOID<span>.</span></div>
+    <div style="font-size:0.62rem;color:var(--text-dim);margin-top:0.5rem;letter-spacing:0.1em;">Personal 3D Viewer — Cykikz</div>
+  </div>
+  <div class="footer-right">
+    <div class="footer-links">
+      <a href="#about">About</a>
+      <a href="#interests">Interests</a>
+      <a href="#viewer">Viewer</a>
+      <a href="#contact">Contact</a>
+      <a href="https://github.com/Cykikz" target="_blank">GitHub ↗</a>
+    </div>
+    <div class="footer-copy">Built by Cykikz. No rights reserved — do whatever.</div>
+  </div>
+</footer>
+
+<button id="light-toggle" onclick="toggleLightPanel()">
+  <span class="dot"></span> Lighting
+</button>
+<div id="light-panel">
+  <div class="lp-head">Scene Lighting</div>
+  <div class="lp-row"><label>Ambient</label><input type="range" id="amb-int" min="0" max="8" step="0.1" value="3.0"></div>
+  <div class="lp-row"><label>Key Intensity</label><input type="range" id="key-int" min="0" max="15" step="0.2" value="8"></div>
+  <div class="lp-row"><label>Fill Intensity</label><input type="range" id="fill-int" min="0" max="10" step="0.1" value="5"></div>
+  <div class="lp-row"><label>Key Color</label><input type="color" id="key-color" value="#ffffff"></div>
+  <div class="lp-row"><label>Fill Color</label><input type="color" id="fill-color" value="#cc88ff"></div>
+  <div class="lp-row"><label>Exposure</label><input type="range" id="exposure" min="0.2" max="4" step="0.05" value="1.8"></div>
+  <div class="lp-row"><label>Light Rotation</label><input type="range" id="env-rot" min="0" max="6.28" step="0.01" value="0"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.querySelectorAll('a, button, .work-card, .interest-row, .drop-zone-ring, input, textarea').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+let renderer, scene, camera, controls, model, clock;
+let ambLight, keyLight, fillLight, rimLight;
+let panelOpen = false;
+
+function initThree() {
+  const wrap = document.getElementById('canvas-wrap');
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.8;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  wrap.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x080808);
+  scene.fog = new THREE.FogExp2(0x080808, 0.035);
+
+  camera = new THREE.PerspectiveCamera(42, wrap.clientWidth / wrap.clientHeight, 0.01, 500);
+  camera.position.set(0, 1.2, 5);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.minDistance = 0.5;
+  controls.maxDistance = 30;
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  const envScene = new THREE.Scene();
+  envScene.background = new THREE.Color(0xffffff);
+  envScene.add(new THREE.HemisphereLight(0xffffff, 0x444466, 4));
+  scene.environment = pmrem.fromScene(envScene).texture;
+
+  ambLight = new THREE.AmbientLight(0xffffff, 3.0);
+  scene.add(ambLight);
+
+  keyLight = new THREE.DirectionalLight(0xffffff, 8.0);
+  keyLight.position.set(4, 6, 3);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.width = 2048;
+  keyLight.shadow.mapSize.height = 2048;
+  keyLight.shadow.bias = -0.001;
+  scene.add(keyLight);
+
+  fillLight = new THREE.DirectionalLight(0xcc88ff, 5.0);
+  fillLight.position.set(-4, 2, -2);
+  scene.add(fillLight);
+
+  rimLight = new THREE.DirectionalLight(0xffffff, 4.0);
+  rimLight.position.set(0, -2, -4);
+  scene.add(rimLight);
+
+  const frontLight = new THREE.DirectionalLight(0xffeedd, 3.0);
+  frontLight.position.set(0, 0, 6);
+  scene.add(frontLight);
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 40),
+    new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.9, metalness: 0.1 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -1.5;
+  ground.receiveShadow = true;
+  scene.add(ground);
+  const grid = new THREE.GridHelper(30, 30, 0x1a1a1a, 0x1a1a1a);
+  grid.position.y = -1.49;
+  scene.add(grid);
+
+  clock = new THREE.Clock();
+  tick();
+  bindControls();
+  window.addEventListener('resize', () => {
+    const w = wrap.clientWidth, h = wrap.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
+}
+
+function tick() {
+  requestAnimationFrame(tick);
+  const t = clock.getElapsedTime();
+  if (model) {
+    model.rotation.y = t * 0.18;
+    model.position.y = Math.sin(t * 0.55) * 0.1;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+function loadGLB(buffer) {
+  const loader = new THREE.GLTFLoader();
+  loader.parse(buffer, '', gltf => {
+    if (model) scene.remove(model);
+    model = gltf.scene;
+    model.traverse(n => {
+      if (!n.isMesh) return;
+      n.castShadow = true; n.receiveShadow = true;
+      const mats = Array.isArray(n.material) ? n.material : [n.material];
+      mats.forEach(m => {
+        if (!m) return;
+        m.envMapIntensity = 3.0;
+        if (m.roughness !== undefined && m.roughness > 0.7) m.roughness = 0.4;
+        if (m.metalness !== undefined && m.metalness < 0.1) m.metalness = 0.3;
+        m.needsUpdate = true;
+      });
+    });
+    const box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const s = 2.5 / Math.max(size.x, size.y, size.z);
+    model.scale.setScalar(s);
+    model.position.sub(center.multiplyScalar(s));
+    scene.add(model);
+    const ov = document.getElementById('drop-overlay');
+    ov.classList.add('hidden');
+    setTimeout(() => ov.style.display = 'none', 800);
+    document.getElementById('light-toggle').classList.add('show');
+  }, err => alert('GLB error: ' + err.message));
+}
+
+function handleFile(f) {
+  const r = new FileReader();
+  r.onload = e => loadGLB(e.target.result);
+  r.readAsArrayBuffer(f);
+}
+
+document.getElementById('file-input').addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+const hero = document.getElementById('hero');
+hero.addEventListener('dragover', e => e.preventDefault());
+hero.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+
+function bindControls() {
+  const get = id => document.getElementById(id);
+  get('amb-int').addEventListener('input', e => ambLight.intensity = +e.target.value);
+  get('key-int').addEventListener('input', e => keyLight.intensity = +e.target.value);
+  get('fill-int').addEventListener('input', e => fillLight.intensity = +e.target.value);
+  get('key-color').addEventListener('input', e => keyLight.color.set(e.target.value));
+  get('fill-color').addEventListener('input', e => fillLight.color.set(e.target.value));
+  get('exposure').addEventListener('input', e => renderer.toneMappingExposure = +e.target.value);
+  get('env-rot').addEventListener('input', e => {
+    const a = +e.target.value;
+    keyLight.position.set(Math.sin(a)*5+4, 6, Math.cos(a)*5+3);
+    fillLight.position.set(-Math.sin(a)*4, 2, -Math.cos(a)*2);
+  });
+}
+
+function toggleLightPanel() {
+  panelOpen = !panelOpen;
+  document.getElementById('light-panel').classList.toggle('open', panelOpen);
+}
+
+function applyPreset(name) {
+  const P = {
+    studio: { amb:3.0, key:8,  fill:3.0, kc:'#ffffff', fc:'#dde8ff', exp:1.8 },
+    neon:   { amb:1.5, key:6,  fill:7.0, kc:'#ff00aa', fc:'#d4ff00', exp:2.0 },
+    golden: { amb:2.0, key:10, fill:3.0, kc:'#ffaa44', fc:'#4488ff', exp:1.5 }
+  }[name];
+  if (!P) return;
+  ambLight.intensity = P.amb; keyLight.intensity = P.key; fillLight.intensity = P.fill;
+  keyLight.color.set(P.kc); fillLight.color.set(P.fc);
+  renderer.toneMappingExposure = P.exp;
+  document.getElementById('amb-int').value = P.amb;
+  document.getElementById('key-int').value = P.key;
+  document.getElementById('fill-int').value = P.fill;
+  document.getElementById('key-color').value = P.kc;
+  document.getElementById('fill-color').value = P.fc;
+  document.getElementById('exposure').value = P.exp;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function handleSubmit(e) {
+  e.preventDefault();
+  document.getElementById('contact-form').style.display = 'none';
+  document.getElementById('form-success').style.display = 'block';
+}
+
+window.addEventListener('load', initThree);
+</script>
+</body>
+</html>
